@@ -1,12 +1,13 @@
 # Adafruit nRF52 Bootloader Changelog
 
-2.6.0 and the OTAFIX 2.x entries below it are Meshtastic's fork; everything
-from 0.6.2 down predates it and is upstream Adafruit history, kept for
-provenance.
+Entries with an `-rm` suffix are RoamMesh's fork of Meshtastic's bootloader:
+`2.6.1-rm1` is Meshtastic 2.6.1 plus the changes listed under it. 2.6.0 and the
+OTAFIX 2.x entries below it are Meshtastic's fork; everything from 0.6.2 down
+predates it and is upstream Adafruit history, kept for provenance.
 
-## Unreleased
+## 2.6.1-rm1
 
-- `mesh_tracker_x1` lights its RGB LED in DFU mode: solid white in USB DFU (UF2 drive or serial), as Seeed's factory bootloader does, and solid blue in BLE OTA DFU. The LED is driven with plain GPIO writes behind a new `LED_DFU_GPIO` board option, not the PWM status LED, so `LEDS_NUMBER` stays 0 and there are no blink patterns. The pins go back to their reset state with every other pin before the application starts. Not yet run on hardware.
+- `mesh_tracker_x1` lights its RGB LED in DFU mode: solid white in USB DFU (UF2 drive or serial), as Seeed's factory bootloader does, and solid blue in BLE OTA DFU. The LED is driven with plain GPIO writes behind a new `LED_DFU_GPIO` board option, not the PWM status LED, so `LEDS_NUMBER` stays 0 and there are no blink patterns. The pins go back to their reset state with every other pin before the application starts. Run on one MeshTracker X1, installed by UF2 over Meshtastic 2.6.1: the application still boots and the LED is solid white in USB DFU. The blue LED in BLE OTA DFU has not been checked on hardware.
 
 ## 2.6.1
 
