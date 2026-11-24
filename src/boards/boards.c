@@ -40,6 +40,25 @@ void neopixel_write(uint8_t* pixels);
 void neopixel_teardown(void);
 #endif
 
+#ifdef LED_DFU_GPIO
+// RGB LED on LED_RED_PIN / LED_GREEN_PIN / LED_BLUE_PIN driven as plain GPIO,
+// for boards that do not use the PWM status LED. No peripheral owns the pins,
+// so board_teardown()'s pin reset is all the cleanup it needs.
+static void led_dfu_gpio_write(bool red, bool green, bool blue) {
+  nrf_gpio_pin_write(LED_RED_PIN, red ? LED_STATE_ON : 1 - LED_STATE_ON);
+  nrf_gpio_pin_write(LED_GREEN_PIN, green ? LED_STATE_ON : 1 - LED_STATE_ON);
+  nrf_gpio_pin_write(LED_BLUE_PIN, blue ? LED_STATE_ON : 1 - LED_STATE_ON);
+}
+
+static void led_dfu_gpio_init(void) {
+  // Set the off level before enabling the outputs so the LED does not flash on every boot.
+  led_dfu_gpio_write(false, false, false);
+  nrf_gpio_cfg_output(LED_RED_PIN);
+  nrf_gpio_cfg_output(LED_GREEN_PIN);
+  nrf_gpio_cfg_output(LED_BLUE_PIN);
+}
+#endif
+
 //--------------------------------------------------------------------+
 // IMPLEMENTATION
 //--------------------------------------------------------------------+
@@ -94,6 +113,10 @@ void board_init(void) {
   #endif
 
   neopixel_init();
+#endif
+
+#ifdef LED_DFU_GPIO
+  led_dfu_gpio_init();
 #endif
 
 #if ENABLE_DCDC_0 == 1
@@ -405,6 +428,26 @@ static uint32_t rgb_color;
 static bool temp_color_active = false;
 
 void led_state(uint32_t state) {
+#ifdef LED_DFU_GPIO
+  // Solid white in USB DFU, solid blue in BLE OTA DFU. STATE_BOOTLOADER_STARTED
+  // is reported on every boot and the writing states carry no mode, so they
+  // leave the LED as it is.
+  switch (state) {
+    case STATE_USB_MOUNTED:
+    case STATE_USB_UNMOUNTED:
+      led_dfu_gpio_write(true, true, true);
+      break;
+
+    case STATE_BLE_CONNECTED:
+    case STATE_BLE_DISCONNECTED:
+      led_dfu_gpio_write(false, false, true);
+      break;
+
+    default:
+      break;
+  }
+#endif
+
   uint32_t new_rgb_color = rgb_color;
   uint32_t temp_color = 0;
   switch (state) {
