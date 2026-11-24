@@ -30,20 +30,24 @@
 /*------------------------------------------------------------------*/
 /* LED
  *------------------------------------------------------------------*/
-/* The X1 carries an RGB LED, but LEDS_NUMBER is 0 and the bootloader drives no
- * status LED of its own, so it shows nothing during DFU. Wiring the pins up as
- * this repo's RGB status LED (LED_RGB_RED_PIN / _GREEN_PIN / _BLUE_PIN, which
- * PWM-drive the DFU state colours) is a wanted follow-up, but not a one-line
- * change: no board in the tree defines LED_RGB_RED_PIN today, so
- * led_pwm_duty_cycle()'s output polarity is unexercised, and led_pwm_teardown()
- * is gated on LEDS_NUMBER > 0 -- wiring the pins as-is would leave PWM0 owning
- * P0.3/24/28 at app jump and kill the application's own LEDs. Polarity itself
- * is not the blocker; firmware's variant.h gives LED_STATE_ON 1. */
+/* The X1 carries an RGB LED. LEDS_NUMBER stays 0, so the PWM status LED and its
+ * blink patterns are not used: wiring the pins up as this repo's RGB status LED
+ * (LED_RGB_RED_PIN / _GREEN_PIN / _BLUE_PIN) is not a one-line change, because
+ * no board in the tree defines LED_RGB_RED_PIN today, so led_pwm_duty_cycle()'s
+ * output polarity is unexercised, and led_pwm_teardown() is gated on
+ * LEDS_NUMBER > 0 -- it would leave PWM0 owning P0.3/24/28 at app jump and kill
+ * the application's own LEDs.
+ *
+ * LED_DFU_GPIO lights the LED with plain GPIO writes instead (see boards.c):
+ * solid white while in USB DFU, as Seeed's factory bootloader does, and solid
+ * blue while in BLE OTA DFU. board_teardown() returns every pin to its reset
+ * state before the application starts, so nothing is left to release. */
 #define LEDS_NUMBER           0
 #define LED_RED_PIN           _PINNUM(0, 3)   // Red
 #define LED_GREEN_PIN         _PINNUM(0, 24)  // Green
 #define LED_BLUE_PIN          _PINNUM(0, 28)  // Blue
 #define LED_STATE_ON          1
+#define LED_DFU_GPIO
 
 /*------------------------------------------------------------------*/
 /* BUTTON

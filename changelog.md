@@ -4,6 +4,10 @@
 from 0.6.2 down predates it and is upstream Adafruit history, kept for
 provenance.
 
+## Unreleased
+
+- `mesh_tracker_x1` lights its RGB LED in DFU mode: solid white in USB DFU (UF2 drive or serial), as Seeed's factory bootloader does, and solid blue in BLE OTA DFU. The LED is driven with plain GPIO writes behind a new `LED_DFU_GPIO` board option, not the PWM status LED, so `LEDS_NUMBER` stays 0 and there are no blink patterns. The pins go back to their reset state with every other pin before the application starts. Not yet run on hardware.
+
 ## 2.6.1
 
 - Fixed the first application boot after a DFU stalling and ending in a watchdog reset about 90 s later on boards with an I2C OLED DFU screen. 2.6.0 left TWIM0 with the `LASTTX_STOP` short, the pin selects and the last transfer's events set when it jumped to the application, and the Arduino core's repeated-start transfers never finish with that short in place. `board_display_teardown()` now clears `SHORTS`, the events and `ERRORSRC`, and disconnects the pin selects. Measured on a WisMesh Pocket after a UF2 copy and after a BLE OTA.
